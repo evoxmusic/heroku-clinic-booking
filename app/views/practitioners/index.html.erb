@@ -1,18 +1,70 @@
-<h1>Find a practitioner</h1>
+<% content_for :title, "Clinic Booking. Book a practitioner near you" %>
 
-<%= form_with url: practitioners_path, method: :get, class: "search" do |f| %>
-  <%= f.select :specialty, options_for_select(Practitioner::SPECIALTIES.map { |s| [s.humanize, s] }, @specialty), include_blank: "Any specialty" %>
-  <%= f.select :city, options_for_select(@cities, @city), include_blank: "Any city" %>
-  <%= f.submit "Search" %>
-<% end %>
+<section class="hero">
+  <div class="wrap">
+    <h1>See a practitioner this week, in your city.</h1>
+    <p class="lede">Choose a specialty, pick a time that suits you, get a confirmation by email. No account needed.</p>
 
-<ul class="practitioners">
-  <% @practitioners.each do |p| %>
-    <li>
-      <%= link_to p.full_name, p %>
-      <span><%= p.specialty.humanize %>, <%= p.city %></span>
-      <span><%= number_to_currency(p.fee, unit: "EUR ", precision: 0) %></span>
-    </li>
-  <% end %>
-</ul>
-<p class="count"><%= Practitioner.count %> practitioners, <%= Appointment.count %> appointments in the system.</p>
+    <%= form_with url: practitioners_path, method: :get, class: "search", data: { turbo: false } do |f| %>
+      <label class="field">
+        <span>Specialty</span>
+        <%= f.select :specialty, specialty_options(@specialty), include_blank: "Any specialty" %>
+      </label>
+      <label class="field">
+        <span>City</span>
+        <%= f.select :city, options_for_select(@cities, @city), include_blank: "Any city" %>
+      </label>
+      <%= f.button "Search", type: :submit, class: "button primary" %>
+    <% end %>
+
+    <ul class="quick">
+      <% %w[general_practitioner dentist dermatologist pediatrician physiotherapist].each do |s| %>
+        <li><%= link_to s.humanize, practitioners_path(specialty: s, city: @city), class: ("on" if @specialty == s) %></li>
+      <% end %>
+    </ul>
+  </div>
+</section>
+
+<section class="results">
+  <div class="wrap">
+    <div class="results-head">
+      <h2>
+        <% if @specialty || @city %>
+          <%= [@specialty&.humanize&.pluralize, @city && "in #{@city}"].compact.join(" ") %>
+        <% else %>
+          Available this week
+        <% end %>
+      </h2>
+      <p class="muted"><%= number_with_delimiter(@stats[:practitioners]) %> practitioners in <%= @stats[:cities] %> cities, <%= number_with_delimiter(@stats[:appointments]) %> appointments booked so far.</p>
+    </div>
+
+    <% if @practitioners.empty? %>
+      <div class="empty">
+        <p>No practitioner matches that search.</p>
+        <p><%= link_to "Clear filters", root_path %> or try another city.</p>
+      </div>
+    <% else %>
+      <ol class="list">
+        <% @practitioners.each do |p| %>
+          <% slot = @next_slots[p.id] %>
+          <li>
+            <span class="avatar" aria-hidden="true"><%= p.initials %></span>
+            <div class="who">
+              <%= link_to p.full_name, practitioner_path(p), class: "name" %>
+              <span class="meta"><%= p.specialty_label %>, <%= p.city %></span>
+            </div>
+            <div class="slot">
+              <span class="meta">Next slot</span>
+              <strong class="<%= 'none' unless slot %>"><%= slot_label(slot) %></strong>
+            </div>
+            <div class="fee">
+              <span class="meta">Consultation</span>
+              <strong><%= euro(p.fee) %></strong>
+            </div>
+            <%= link_to "Book", practitioner_path(p, starts_at: slot&.iso8601), class: "button" %>
+          </li>
+        <% end %>
+      </ol>
+    <% end %>
+  </div>
+</section>

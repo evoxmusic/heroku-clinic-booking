@@ -1,25 +1,55 @@
-<p><%= link_to "Back to search", practitioners_path %></p>
-<h1><%= @practitioner.full_name %></h1>
-<p><%= @practitioner.specialty.humanize %> in <%= @practitioner.city %>. <%= @practitioner.address %></p>
-<p><%= @practitioner.bio %></p>
-<p>Consultation: <%= number_to_currency(@practitioner.fee, unit: "EUR ", precision: 0) %></p>
+<% content_for :title, "#{@practitioner.full_name}, #{@practitioner.specialty_label} in #{@practitioner.city}" %>
 
-<% if notice %><p class="notice"><%= notice %></p><% end %>
-<% if alert %><p class="alert"><%= alert %></p><% end %>
+<div class="wrap crumbs">
+  <%= link_to "Find care", root_path %> / <%= link_to @practitioner.specialty_label.pluralize, practitioners_path(specialty: @practitioner.specialty) %> / <span><%= @practitioner.city %></span>
+</div>
 
-<h2>Book</h2>
-<%= form_with url: practitioner_appointments_path(@practitioner), method: :post do |f| %>
-  <%= f.email_field :email, placeholder: "you@example.com", required: true %>
-  <%= f.text_field :first_name, placeholder: "First name" %>
-  <%= f.text_field :last_name, placeholder: "Last name" %>
-  <%= f.datetime_local_field :starts_at, required: true, value: (Time.current + 1.day).change(min: 0).strftime("%Y-%m-%dT%H:%M") %>
-  <%= f.text_field :notes, placeholder: "Reason (optional)" %>
-  <%= f.submit "Book appointment" %>
-<% end %>
+<div class="wrap profile">
+  <aside class="card practitioner">
+    <span class="avatar large" aria-hidden="true"><%= @practitioner.initials %></span>
+    <h1><%= @practitioner.full_name %></h1>
+    <p class="meta"><%= @practitioner.specialty_label %></p>
+    <dl>
+      <dt>Practice</dt>
+      <dd><%= @practitioner.address %>, <%= @practitioner.city %></dd>
+      <dt>Consultation</dt>
+      <dd><%= euro(@practitioner.fee) %>, paid at the practice<%= ". Online payment available" if CLINIC[:online_payment] %></dd>
+      <dt>Reminder</dt>
+      <dd>By email <%= CLINIC[:reminder_hours_before] %> hours before</dd>
+    </dl>
+    <p class="bio"><%= @practitioner.bio %></p>
+  </aside>
 
-<h2>Next appointments</h2>
-<ul>
-  <% @upcoming.each do |a| %>
-    <li><%= a.starts_at.strftime("%a %d %b %H:%M") %>, <%= a.status %></li>
-  <% end %>
-</ul>
+  <section class="booking">
+    <h2>Choose a time</h2>
+    <%= form_with url: practitioner_appointments_path(@practitioner), method: :post, class: "book", data: { turbo: false } do |f| %>
+      <div class="days">
+        <% @free_slots.each do |day, slots| %>
+          <div class="day">
+            <h3><span><%= day == Time.zone.tomorrow ? "Tomorrow" : day.strftime("%A") %></span><%= day.strftime("%-d %b") %></h3>
+            <% if slots.empty? %>
+              <p class="meta">Fully booked</p>
+            <% else %>
+              <% slots.each do |t| %>
+                <% id = "slot-#{t.to_i}" %>
+                <%= f.radio_button :starts_at, t.iso8601, id: id, checked: (@selected.present? && Time.zone.parse(@selected) == t), required: true %>
+                <label for="<%= id %>"><%= t.strftime("%H:%M") %></label>
+              <% end %>
+            <% end %>
+          </div>
+        <% end %>
+      </div>
+
+      <h2>Your details</h2>
+      <div class="fields">
+        <label class="field"><span>Email</span><%= f.email_field :email, required: true, autocomplete: "email", placeholder: "you@example.com" %></label>
+        <label class="field"><span>Phone (optional)</span><%= f.telephone_field :phone, autocomplete: "tel", placeholder: "+33 6 12 34 56 78" %></label>
+        <label class="field"><span>First name</span><%= f.text_field :first_name, autocomplete: "given-name" %></label>
+        <label class="field"><span>Last name</span><%= f.text_field :last_name, autocomplete: "family-name" %></label>
+        <label class="field wide"><span>Reason for the visit (optional)</span><%= f.text_field :notes, placeholder: "Annual check-up, follow-up, new symptom" %></label>
+      </div>
+      <p class="fine">You will get a confirmation by email within a minute, and a reminder the day before. Cancel any time from that email.</p>
+      <%= f.button "Book this slot", type: :submit, class: "button primary large" %>
+    <% end %>
+  </section>
+</div>

@@ -1,28 +1,51 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
     <title><%= content_for(:title) || "Clinic Booking" %></title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="application-name" content="Clinic Booking">
-    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#0E6B63">
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
-
     <%= yield :head %>
-
-    <%# Enable PWA manifest for installable apps (make sure to enable in config/routes.rb too!) %>
-    <%#= tag.link rel: "manifest", href: pwa_manifest_path(format: :json) %>
-
-    <link rel="icon" href="/icon.png" type="image/png">
     <link rel="icon" href="/icon.svg" type="image/svg+xml">
-    <link rel="apple-touch-icon" href="/icon.png">
-
-    <%# Includes all stylesheet files in app/assets/stylesheets %>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
   </head>
 
   <body>
-    <%= yield %>
+    <header class="site-header">
+      <div class="wrap">
+        <%= link_to root_path, class: "brand" do %>
+          <span class="brand-mark" aria-hidden="true"></span>
+          <span>Clinic Booking</span>
+        <% end %>
+        <nav class="site-nav" aria-label="Main">
+          <%= link_to "Find care", root_path %>
+          <a href="#" class="muted">For practitioners</a>
+          <a href="#" class="button ghost">Sign in</a>
+        </nav>
+      </div>
+    </header>
+
+    <% if notice || alert %>
+      <div class="wrap">
+        <% if notice %><div class="flash notice" role="status"><%= notice %></div><% end %>
+        <% if alert %><div class="flash alert" role="alert"><%= alert %></div><% end %>
+      </div>
+    <% end %>
+
+    <main>
+      <%= yield %>
+    </main>
+
+    <footer class="site-footer">
+      <div class="wrap">
+        <span>Clinic Booking. Appointments with practitioners in 10 French cities.</span>
+        <span>Questions: <a href="mailto:<%= CLINIC[:support_email] %>"><%= CLINIC[:support_email] %></a></span>
+      </div>
+    </footer>
   </body>
 </html>
