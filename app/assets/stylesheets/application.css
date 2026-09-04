@@ -1,0 +1,10 @@
+body { font-family: system-ui, sans-serif; max-width: 860px; margin: 40px auto; padding: 0 16px; color: #1c1a2b; }
+h1 { letter-spacing: -0.01em; }
+.search { display: flex; gap: 8px; margin: 16px 0 24px; }
+.practitioners { list-style: none; padding: 0; }
+.practitioners li { display: flex; gap: 16px; padding: 10px 0; border-bottom: 1px solid #ddd; }
+.practitioners li a { font-weight: 600; min-width: 240px; }
+.count { color: #666; font-size: 14px; }
+.notice { background: #ddf0e6; padding: 10px; }
+.alert { background: #f9e7da; padding: 10px; }
+form input, form select { padding: 6px 8px; margin: 4px 4px 4px 0; }

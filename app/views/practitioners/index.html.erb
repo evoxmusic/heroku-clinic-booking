@@ -1,0 +1,18 @@
+<h1>Find a practitioner</h1>
+
+<%= form_with url: practitioners_path, method: :get, class: "search" do |f| %>
+  <%= f.select :specialty, options_for_select(Practitioner::SPECIALTIES.map { |s| [s.humanize, s] }, @specialty), include_blank: "Any specialty" %>
+  <%= f.select :city, options_for_select(@cities, @city), include_blank: "Any city" %>
+  <%= f.submit "Search" %>
+<% end %>
+
+<ul class="practitioners">
+  <% @practitioners.each do |p| %>
+    <li>
+      <%= link_to p.full_name, p %>
+      <span><%= p.specialty.humanize %>, <%= p.city %></span>
+      <span><%= number_to_currency(p.fee, unit: "EUR ", precision: 0) %></span>
+    </li>
+  <% end %>
+</ul>
+<p class="count"><%= Practitioner.count %> practitioners, <%= Appointment.count %> appointments in the system.</p>

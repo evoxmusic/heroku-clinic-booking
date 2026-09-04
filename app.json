@@ -1,0 +1,47 @@
+{
+  "name": "clinic-booking",
+  "description": "Appointment booking for clinics. Rails 8, Sidekiq, Postgres, Redis.",
+  "repository": "https://github.com/Guimove/heroku-clinic-booking",
+  "keywords": ["rails", "sidekiq", "postgres", "redis"],
+  "stack": "heroku-24",
+  "buildpacks": [{ "url": "heroku/ruby" }],
+  "addons": [
+    { "plan": "heroku-postgresql:essential-0" },
+    { "plan": "heroku-redis:mini" }
+  ],
+  "formation": {
+    "web": { "quantity": 1, "size": "basic" },
+    "worker": { "quantity": 1, "size": "basic" }
+  },
+  "scripts": {
+    "postdeploy": "bundle exec rails db:seed"
+  },
+  "env": {
+    "SECRET_KEY_BASE": { "generator": "secret" },
+    "RAILS_ENV": { "value": "production" },
+    "RAILS_LOG_TO_STDOUT": { "value": "enabled" },
+    "RAILS_SERVE_STATIC_FILES": { "value": "enabled" },
+    "SEED_APPOINTMENTS": { "value": "20000" },
+    "APP_HOST": { "required": false },
+    "DEFAULT_TIMEZONE": { "value": "Europe/Paris" },
+    "REMINDER_HOURS_BEFORE": { "value": "24" },
+    "MAX_BOOKINGS_PER_DAY": { "value": "12" },
+    "FEATURE_ONLINE_PAYMENT": { "value": "false" },
+    "SUPPORT_EMAIL": { "value": "support@clinic-booking.example" },
+    "STRIPE_SECRET_KEY": { "required": false },
+    "STRIPE_PUBLISHABLE_KEY": { "required": false },
+    "SENDGRID_API_KEY": { "required": false },
+    "TWILIO_ACCOUNT_SID": { "required": false },
+    "TWILIO_AUTH_TOKEN": { "required": false },
+    "SENTRY_DSN": { "required": false },
+    "MAPS_API_KEY": { "required": false },
+    "SIDEKIQ_WEB_USER": { "value": "admin" },
+    "SIDEKIQ_WEB_PASSWORD": { "generator": "secret" }
+  },
+  "environments": {
+    "review": {
+      "addons": ["heroku-postgresql:essential-0", "heroku-redis:mini"],
+      "env": { "SEED_APPOINTMENTS": "5000" }
+    }
+  }
+}
