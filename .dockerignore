@@ -1,0 +1,32 @@
+.git
+.gitignore
+.gitattributes
+.github
+*.md
+README.md
+
+# Local env / secrets
+.env
+.env.*
+config/master.key
+
+# Runtime dirs (recreated in the image)
+log/*
+tmp/*
+storage/*
+!log/.keep
+!tmp/.keep
+!storage/.keep
+
+# Test / tooling
+.rubocop.yml
+.ruby-version
+coverage
+vendor/bundle
+
+# Editor
+.vscode
+.idea
+*.swp
+*.swo
+.DS_Store

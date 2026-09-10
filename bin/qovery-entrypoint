@@ -1,0 +1,12 @@
+#!/bin/bash
+# Qovery container entrypoint.
+# The web service sets RUN_DB_PREPARE=true so schema load + migrations (and
+# first-run seeds) happen once before the app boots. The worker leaves it unset.
+set -e
+
+if [ "${RUN_DB_PREPARE:-false}" = "true" ]; then
+  echo "==> Running rails db:prepare (create/migrate/seed as needed)"
+  bundle exec rails db:prepare
+fi
+
+exec "$@"
